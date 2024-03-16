@@ -31,7 +31,7 @@ def get_customers():
     try:
         with db_connection() as db:
             cursor = db.cursor()
-            cursor.execute('SELECT * from customer')
+            cursor.execute('SELECT * from customer;')
             customer_list = []
             for customer_id, gender, age , annualIncome, spendingScore, profession,workExperience, familySize in cursor:
                 customer = {}
@@ -55,7 +55,7 @@ def get_customer(customer_id):
     try:
         with db_connection() as db:
             cursor = db.cursor()
-            cursor.execute(f"SELECT * from customer WHERE customerID={customer_id}")
+            cursor.execute(f"SELECT * from customer WHERE customerID={customer_id};")
             col = cursor.fetchone()
             customer = {}
             if col is not None:
@@ -113,13 +113,64 @@ def update_profession(customer_id):
             cursor = db.cursor()
             content = request.json
             profession = content['Profession']
-            cursor.execute(f"UPDATE customer SET Profession ='{profession}' WHERE customerID={customer_id}")
+            cursor.execute(f"UPDATE customer SET Profession ='{profession}' WHERE customerID={customer_id};")
             db.commit()
             return make_response({"success" : "customer updated"}, 202)
     except Exception as e:
        
         return make_response({'error': str(e)}, 400)
-        
+    
+@app.route('/highest_income_report', methods=['GET'])
+def get_highest_income():
+    try:
+        with db_connection() as db:
+            cursor = db.cursor()
+            cursor.execute(f"SELECT CustomerID,Annual_Income,Profession FROM customer ORDER BY Annual_Income desc limit 3;")
+            customer_list = []
+            
+            for customer_id, annualIncome, profession in cursor:
+                # customer = {}                
+                # customer['AnnualIncome'] = annualIncome
+                # customer['customer_id'] = customer_id
+                # customer['Profession'] = profession
+                response_data = {
+                    "CustomerID": customer_id,
+                    "AnnualIncome": annualIncome,
+                    "Profession": profession}
+                customer_list.append(response_data)
+            cursor.close()
+            db.close()
+            return make_response(customer_list, 200)
+            
+    except Exception as e:
+         return make_response({'error': str(e)}, 400)
+
+
+# @app.route('/highest_income_report', methods=['GET'])
+# def get_highest_income():
+#     try:
+#         with db_connection() as db:
+#             cursor = db.cursor()
+
+#             # Find the customer with the highest income
+#             cursor.execute("SELECT CustomerID, Annual_Income, Profession FROM customer ORDER BY Annual_Income desc limit 3;")
+#             customer = cursor  # Fetch only the single highest-income row
+
+#             # Check if a customer was found
+#             while customer is not None:
+#                 customer_id, annual_income, profession = customer
+#                 response_data = {
+#                     "CustomerID": customer_id,
+#                     "AnnualIncome": annual_income,
+#                     "Profession": profession
+#                 }
+#                 return make_response(response_data, 200)
+#             else:
+#                 # Handle the case where no customer exists (optional)
+#                 return make_response({'message': 'No customer found'}, 404)
+
+#     except Exception as e:
+#         return make_response({'error': str(e)}, 400)       
 
 # @app.route('/delete_customer/<customer_id>', methods=['DELETE'])
 # def delete_customer(customer_id):
