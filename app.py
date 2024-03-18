@@ -1,6 +1,6 @@
 from flask import Flask, request, make_response
 import mysql.connector
-from comp3161_lab3 import *
+from comp3161_lab3 import insert_queries
 
 
 app = Flask(__name__)
@@ -12,15 +12,6 @@ def db_connection():
                                    database = "Comp3161_lab_3"
                                    )
     return conn
-
-
-
-
-
-# @app.route('/hello_world', methods=['GET'])
-# def hello_world():
-#     return "hello world"
-
 
 
 
@@ -97,6 +88,7 @@ def add_customer():
 
             cursor.execute(f"INSERT INTO customer (CustomerId, Gender, Age , Annual_Income, Spending_Score, Profession, Work_Experience, Family_Size ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);", customer_data)
             db.commit()  
+            d = insert_queries()
 
             return make_response({"success": "Customer added"}, 201)
 
@@ -209,3 +201,4 @@ def get_avg_experience():
     
 if __name__ == '__main__':
     app.run(port=5000)
+   
